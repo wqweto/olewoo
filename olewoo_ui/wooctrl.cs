@@ -46,9 +46,10 @@ namespace Org.Benf.OleWoo
         private TreeNode GenNodeTree(ITlibNode tln, NodeLocator nl)
         {
             var tn = new TreeNode(tln.Name, tln.ImageIndex,
-                (int) ITlibNode.ImageIndices.idx_selected,
-                tln.Children.ConvertAll(x => GenNodeTree(x, nl)).ToArray()) {Tag = tln};
+                (int) ITlibNode.ImageIndices.idx_selected) {Tag = tln};
             nl.Add(tn);
+            var children = tln.Children.Where(x => !nl.Exists(x)).ToList();
+            tn.Nodes.AddRange(children.ConvertAll(x => GenNodeTree(x, nl)).ToArray());
             return tn;
         }
 
@@ -241,6 +242,11 @@ namespace Org.Benf.OleWoo
             {
                 _linkmap[oname] = nn;
             }
+        }
+
+        public bool Exists(ITlibNode tli)
+        {
+            return _linkmap.ContainsKey(tli.ObjectName ?? string.Empty);
         }
 
         // O(N).  FIX!
